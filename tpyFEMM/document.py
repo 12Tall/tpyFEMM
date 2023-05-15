@@ -32,7 +32,7 @@ class Document(Element):
     groupNo = 0
 
     def getUniqueGroupNo(self):
-        self.groupNo += 1
+        self.groupNo = self.groupNo + 1
         return self.groupNo
 
     def render(self):

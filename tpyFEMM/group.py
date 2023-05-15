@@ -20,10 +20,13 @@ class Group(Element):
 
     def render(self):
         for node in self.nodes:
+            node.groupNo = self.no
             node.render()
         for segment in self.segments:
+            segment.groupNo = self.no
             segment.render()
         for label in self.blockLabels:
+            label.groupNo = self.no
             label.render()
 
     def translate(self, dx: float = .0, dy: float = .0):
