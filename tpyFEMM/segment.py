@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import List, Tuple
 from abc import ABC, abstractmethod
 import femm
 import math
 
-from .element import Element
+from .element import Element, Position
 
 
 @dataclass
@@ -12,9 +12,9 @@ class Segment(Element):
     """
     连线基类(抽象类)
     """
-    start: Tuple[float, float] = (.0, .0)
+    start: Position = None
     """ (x,y) 起始位置, 默认为(0.0, 0.0)"""
-    end: Tuple[float, float] = (.0, .0)
+    end: Position = None
     """ (x,y) 终止位置(0.0, 0.0)"""
     propName: str = ''
     """属性名默认为空, 且此属性仅在电场仿真时会用到"""
@@ -23,8 +23,46 @@ class Segment(Element):
     hide: 0 | 1 = 0
     """在后处理中隐藏线条"""
 
+    def translate(self, dx: float = .0, dy: float = .0):
+        """
+        平移连线
+        """
+        self.start.translate(dx, dy)
+        self.end.translate(dx, dy)
+        return self
+
+    def rotate(self, angle: float = .0, bx: float = .0, by: float = .0):
+        """
+        旋转连线
+        """
+        self.start.rotate(angle, bx, by)
+        self.end.rotate(angle, bx, by)
+        return self
+
+    def render(self):
+        self.addSegment()
+        self.selectSegment()
+        self.setSegmentProp()
+        self.clearSelected()
+
     @abstractmethod
     def getMidPoint(self):
+        pass
+
+    @abstractmethod
+    def addSegment(self):
+        pass
+
+    @abstractmethod
+    def selectSegment(self):
+        pass
+
+    @abstractmethod
+    def clearSelected(self):
+        pass
+
+    @abstractmethod
+    def setSegmentProp(self):
         pass
 
 
@@ -62,8 +100,10 @@ class ArcSegment(Segment):
         """
         计算圆弧的中点
         """
-        x1, y1 = self.start
-        x2, y2 = self.end
+        x1 = self.start.x
+        y1 = self.start.y
+        x2 = self.end.x
+        y2 = self.end.y
         # 转换为弧度
         angle = math.radians(self.angle)
         mid_x = (x1 + x2) / 2
@@ -87,14 +127,18 @@ class MagneticsLineSegment(LineSegment):
     磁性直线(需要依赖正确的节点)
     """
 
-    def render(self):
-        x1, y1 = self.start
-        x2, y2 = self.end
+    def addSegment(self):
+        femm.mi_addsegment(self.start.x, self.start.y, self.end.x, self.end.y)
+
+    def selectSegment(self):
         x, y = self.getMidPoint()
-        femm.mi_addsegment(x1, y1, x2, y2)
         femm.mi_selectsegment(x, y)
+
+    def setSegmentProp(self):
         femm.mi_setsegmentprop(self.propName, self.elementSize, self.autoMesh,
                                self.hide, self.groupNo)
+
+    def clearSelected(self):
         femm.mi_clearselected()
 
 
@@ -104,12 +148,17 @@ class MagneticsArcSegment(ArcSegment):
     磁性曲线
     """
 
-    def render(self):
-        x1, y1 = self.start
-        x2, y2 = self.end
+    def addSegment(self):
+        femm.mi_addarc(self.start.x, self.start.y, self.end.x, self.end.y,
+                       self.angle, self.maxseg)
+
+    def selectSegment(self):
         x, y = self.getMidPoint()
-        femm.mi_addarc(x1, y1, x2, y2, self.angle, self.maxseg)
-        femm.mi_selectarcsegment(x, y)  # 这里的方法有可能导致无法选择曲线
+        femm.mi_selectarcsegment(x, y)
+
+    def setSegmentProp(self):
         femm.mi_setarcsegmentprop(self.maxSegDeg, self.propName, self.hide,
                                   self.groupNo)
+
+    def clearSelected(self):
         femm.mi_clearselected()
