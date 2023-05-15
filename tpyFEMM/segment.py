@@ -78,8 +78,10 @@ class LineSegment(Segment):
 
     def getMidPoint(self):
         """计算直线中点"""
-        x1, y1 = self.start
-        x2, y2 = self.end
+        x1 = self.start.x
+        y1 = self.start.y
+        x2 = self.end.x
+        y2 = self.end.y
         return (x1 + x2) / 2, (y1 + y2) / 2
 
 

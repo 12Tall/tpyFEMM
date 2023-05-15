@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import math
 
-
 @dataclass
 class Element(ABC):
     """

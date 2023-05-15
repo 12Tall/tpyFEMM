@@ -1,6 +1,6 @@
 import copy
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Type
 from .element import Element
 from .node import Node
 from .segment import Segment
@@ -86,9 +86,11 @@ class Group(Element):
         """
         return copy.deepcopy(self)
 
-
-class PolygonGroup(Group):
-    """
-    多边形组
-    """
-    pass
+    def Polygon(factory: Type[Segment], *args: Node):
+        grp = Group()
+        for node in args:
+            grp.nodes.append(node)
+        for i in range(len(grp.nodes)):
+            grp.segments.append(
+                factory(grp.nodes[i - 1].position, grp.nodes[i].position))
+        return grp
