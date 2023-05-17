@@ -1,3 +1,3 @@
-from tpyFEMM.document import Document
+from tpyFEMM.document.magnetics import Document
 
 Document()

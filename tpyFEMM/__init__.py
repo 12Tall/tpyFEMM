@@ -1,6 +1,8 @@
-from .block import BlockLabel, MagneticsBlockLabel
-from .document import Document, DocType
-from .group import Group
-from .node import MagneticsNode
-from .segment import Segment, MagneticsArcSegment, MagneticsLineSegment
-from .element import Position
+from .node import *
+from .segment import *
+from .material import *
+from .block import *
+from .property import *
+from .base import *
+from .group import *
+from .document.magnetics import *
